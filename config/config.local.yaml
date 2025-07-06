@@ -1,0 +1,17 @@
+app:
+  env: local
+  port: 8080
+
+database:
+  host: chesshub-user-local-db
+  port: 5432
+  name: chesshub
+  user: postgres
+  ssl_mode: disable
+  driver: postgres
+
+redis:
+  user: redis
+  host: chesshub-sessions-local-redis
+  port: 6379
+  db_number: 0

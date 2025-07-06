@@ -1,0 +1,40 @@
+version: '3'
+
+tasks:
+  run:local:
+    cmd: docker-compose -f docker-compose.local.yml up app
+    desc: "Start auto compile watching with local env"
+
+  run:dev:
+    cmd: air
+    desc: "Start auto compile watching with dev env"
+
+  run:prod:
+    env:
+      GO_ENV: "production"
+    cmd: air
+    desc: "Start auto compile watching with prod env"
+
+  run:redis:
+    cmd: docker-compose -f docker-compose.local.yml up redis
+
+  run:redis-insight:
+    cmd: docker-compose -f docker-compose.local.yml up redis-insight
+
+  run:db:
+    cmd: docker-compose -f docker-compose.local.yml up db
+
+  run:adminer:
+    cmd: docker-compose -f docker-compose.local.yml up adminer
+
+  test:
+    cmd: go test ./...
+    desc: "Run tests"
+
+  lint:
+    cmd: golangci-lint run
+    desc: "Run linter"
+
+  lint:fmt:
+    cmd: golangci-lint fmt
+    desc: "Run fixing lint errors"

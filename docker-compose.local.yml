@@ -1,0 +1,74 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ../Dockerfile.local
+    container_name: chesshub-user-local-app
+    ports:
+      - "7090:8080"
+    env_file: ".env.local"
+    volumes:
+      - .:/app
+      - ./config:/config
+    working_dir: /app
+    command: ["air", "-c", ".air.toml"]
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - chesshub-net
+  db:
+    build:
+      context: ..
+      dockerfile: Dockerfile.local.postgres
+    container_name: chesshub-user-local-db
+    ports:
+      - "7432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: chesshub
+    volumes:
+      - ./postgres/creating-databases.sql:/docker-entrypoint-initdb.d/01-creating-databases.sql
+    networks:
+      - chesshub-net
+  redis:
+    image: redis:7-alpine
+    container_name: chesshub-user-local-redis
+    ports:
+      - "7379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - chesshub-net
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: chesshub-user-local-redis-insight
+    ports:
+      - "7540:5540"
+    depends_on:
+      - redis
+    volumes:
+      - redisinsight_data:/data
+    networks:
+      - chesshub-net
+  adminer:
+    image: adminer
+    container_name: chesshub-user-local-adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "7080:8080"
+    networks:
+      - chesshub-net
+networks:
+  chesshub-net:
+
+volumes:
+  postgres_data:
+  redis_data:
+  redisinsight_data:
