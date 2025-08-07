@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "github.com/EugeneTsydenov/chesshub-user-service/internal/controllers/grpccontroller/genproto;userproto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service UserService {
+
+}
+
+message RegisterUserRequest {
+
+}

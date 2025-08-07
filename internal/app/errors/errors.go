@@ -66,11 +66,13 @@ func (e *AppError) WithMetadata(key string, value string) *AppError {
 	}
 
 	e.Metadata[key] = value
+
 	return e
 }
 
 func (e *AppError) WithCause(cause error) *AppError {
 	e.Cause = cause
+
 	return e
 }
 
@@ -119,11 +121,15 @@ func NewCanceledError(msg string) *AppError {
 }
 
 func FromDomainError(err error) *AppError {
+	var e *AppError
+
 	switch {
 	case errors.Is(err, context.Canceled):
 		return NewCanceledError("Operation was canceled.").WithCause(err)
 	case errors.Is(err, context.DeadlineExceeded):
 		return NewDeadlineExceededError("Operation time out.").WithCause(err)
+	case errors.As(err, &e):
+		return e
 	default:
 		return NewInternalError("Unexpected server error.").WithCause(err)
 	}

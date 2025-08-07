@@ -21,6 +21,8 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+var shutdownTimeout = 30 * time.Second
+
 type Shutdowner interface {
 	Shutdown(ctx context.Context) error
 }
@@ -56,11 +58,13 @@ func New(cfg *config.Config) *App {
 func (a *App) InitDeps(ctx context.Context) error {
 	if err := a.initRedisCache(ctx); err != nil {
 		a.logger.Error(err)
+
 		return err
 	}
 
 	if err := a.initPgDatabase(ctx); err != nil {
 		a.logger.Error(err)
+
 		return err
 	}
 
@@ -118,13 +122,13 @@ func (a *App) Run(ctx context.Context) error {
 
 	p := fmt.Sprintf(":%v", a.config.App.Port)
 	listener, err := net.Listen("tcp", p)
-	if err != nil {
+	if err != nil { //nolint:wsl
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 
 	go func() {
 		a.logger.Info("Starting gRPC server", "port", p)
-		if err := a.gRPCServer.Serve(listener); err != nil {
+		if err := a.gRPCServer.Serve(listener); err != nil { //nolint:wsl
 			a.logger.Error("gRPC server error", "error", err)
 		}
 	}()
@@ -146,7 +150,7 @@ func (a *App) Shutdown(ctx context.Context) error {
 
 	a.requestTracker.SetShuttingDown(true)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	grpcShutdownDone := make(chan struct{})
